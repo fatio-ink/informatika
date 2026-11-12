@@ -1,0 +1,1820 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Si Rembo Arena — Game Edukasi Balap & Tangkap Ayam</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --font-display: 'Fredoka', sans-serif;
+      --font-body: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+    }
+
+    body {
+      font-family: var(--font-body);
+      overflow-x: hidden;
+      background: linear-gradient(180deg, #38bdf8 0%, #bae6fd 45%, #86efac 45%, #22c55e 100%);
+      min-height: 100vh;
+    }
+
+    .font-cartoon {
+      font-family: var(--font-display);
+      letter-spacing: 0.02em;
+    }
+
+    /* Cloud Background Animation */
+    @keyframes floatCloud {
+      0% { transform: translateX(-15vw); }
+      100% { transform: translateX(115vw); }
+    }
+    .cloud-anim-1 { animation: floatCloud 38s linear infinite; }
+    .cloud-anim-2 { animation: floatCloud 52s linear infinite; animation-delay: -18s; }
+    .cloud-anim-3 { animation: floatCloud 44s linear infinite; animation-delay: -32s; }
+
+    /* ==========================================
+       METODE ANIMASI VEKTOR (SVG + CSS KEYFRAMES)
+       ========================================== */
+
+    /* 1. Pose Diam (Idle Breathing & Blinking) */
+    @keyframes chickenIdleBody {
+      0%, 100% { transform: translateY(0px) scaleY(1); }
+      50% { transform: translateY(-4px) scaleY(1.03); }
+    }
+    @keyframes chickenIdleWing {
+      0%, 100% { transform: rotate(0deg); }
+      50% { transform: rotate(-6deg); }
+    }
+    @keyframes chickenBlink {
+      0%, 92%, 100% { transform: scaleY(1); }
+      95% { transform: scaleY(0.1); }
+    }
+    @keyframes chickenCrestBounce {
+      0%, 100% { transform: rotate(0deg); }
+      50% { transform: rotate(5deg) translateY(-1px); }
+    }
+
+    .chicken-svg .svg-body-group {
+      transform-origin: center bottom;
+      animation: chickenIdleBody 1.1s ease-in-out infinite;
+    }
+    .chicken-svg .svg-wing {
+      transform-box: fill-box;
+      transform-origin: 30% 30%;
+      animation: chickenIdleWing 1.1s ease-in-out infinite;
+    }
+    .chicken-svg .svg-eye {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: chickenBlink 3.5s infinite;
+    }
+    .chicken-svg .svg-crest {
+      transform-box: fill-box;
+      transform-origin: bottom center;
+      animation: chickenCrestBounce 1.1s ease-in-out infinite;
+    }
+    .chicken-svg .svg-leg-left,
+    .chicken-svg .svg-leg-right {
+      transform-box: fill-box;
+      transform-origin: top center;
+      transition: transform 0.2s;
+    }
+
+    /* 2. Pose Lari 4 Langkah (Sprint Animation) */
+    @keyframes chickenRunBody {
+      0%, 100% { transform: translateY(0px) rotate(8deg); }
+      25% { transform: translateY(-12px) rotate(12deg); }
+      50% { transform: translateY(-2px) rotate(6deg); }
+      75% { transform: translateY(-14px) rotate(13deg); }
+    }
+    @keyframes chickenRunWing {
+      0%, 100% { transform: rotate(0deg) scaleY(1); }
+      50% { transform: rotate(-42deg) scaleY(1.1); }
+    }
+    @keyframes chickenRunLegLeft {
+      0%, 100% { transform: rotate(-38deg); }
+      50% { transform: rotate(38deg); }
+    }
+    @keyframes chickenRunLegRight {
+      0%, 100% { transform: rotate(38deg); }
+      50% { transform: rotate(-38deg); }
+    }
+    @keyframes dustPuff {
+      0% { opacity: 0.9; transform: translate(0, 0) scale(0.5); }
+      100% { opacity: 0; transform: translate(-28px, -10px) scale(1.6); }
+    }
+
+    .is-running .chicken-svg .svg-body-group {
+      animation: chickenRunBody 0.32s linear infinite !important;
+    }
+    .is-running .chicken-svg .svg-wing {
+      animation: chickenRunWing 0.14s ease-in-out infinite !important;
+    }
+    .is-running .chicken-svg .svg-leg-left {
+      animation: chickenRunLegLeft 0.22s linear infinite !important;
+    }
+    .is-running .chicken-svg .svg-leg-right {
+      animation: chickenRunLegRight 0.22s linear infinite !important;
+    }
+    .is-running .dust-particle {
+      animation: dustPuff 0.35s ease-out infinite;
+    }
+
+    /* 3. Pose Salah Jawab (Dizzy / Shake) */
+    @keyframes chickenWrongShake {
+      0%, 100% { transform: translateX(0) rotate(0deg); }
+      20% { transform: translateX(-8px) rotate(-10deg); }
+      40% { transform: translateX(8px) rotate(10deg); }
+      60% { transform: translateX(-6px) rotate(-6deg); }
+      80% { transform: translateX(6px) rotate(6deg); }
+    }
+    .is-wrong .chicken-svg {
+      animation: chickenWrongShake 0.45s ease-in-out;
+    }
+
+    /* 4. Pose Menang / Tertangkap di Garis Finis */
+    @keyframes chickenVictoryJump {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-22px) scale(1.08); }
+    }
+    .is-winner .chicken-svg {
+      animation: chickenVictoryJump 0.55s ease-in-out infinite;
+    }
+
+    /* Track & Grass Styling */
+    .race-track-lane {
+      background: repeating-linear-gradient(
+        90deg,
+        #dcfce7 0px,
+        #dcfce7 36px,
+        #bbf7d0 36px,
+        #bbf7d0 72px
+      );
+      box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.08);
+    }
+
+    .dirt-path {
+      background: repeating-linear-gradient(
+        90deg,
+        #fde68a 0px,
+        #fde68a 28px,
+        #fcd34d 28px,
+        #fcd34d 56px
+      );
+      border-top: 3px dashed #d97706;
+      border-bottom: 3px dashed #d97706;
+    }
+
+    .finish-checker {
+      background-image: conic-gradient(
+        #1e293b 90deg,
+        #ffffff 90deg 180deg,
+        #1e293b 180deg 270deg,
+        #ffffff 270deg
+      );
+      background-size: 16px 16px;
+    }
+
+    /* 3D Arcade Buttons */
+    .btn-3d {
+      transition: transform 0.08s ease, box-shadow 0.08s ease;
+    }
+    .btn-3d:active:not(:disabled) {
+      transform: translateY(4px);
+    }
+
+    /* Smooth Chicken Position Transition */
+    .chicken-runner-wrapper {
+      transition: left 0.65s cubic-bezier(0.34, 1.45, 0.64, 1);
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #94a3b8;
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+
+<body class="relative min-h-screen flex flex-col justify-between overflow-x-hidden text-slate-800">
+
+  <!-- Decorative Moving Clouds -->
+  <div class="pointer-events-none fixed inset-x-0 top-0 h-48 overflow-hidden z-0 opacity-85">
+    <svg class="cloud-anim-1 absolute top-5 w-36 h-20 text-white/90" viewBox="0 0 120 60" fill="currentColor">
+      <path d="M25 50h70a20 20 0 0 0 0-40 28 28 0 0 0-54-6A22 22 0 0 0 25 50z"/>
+    </svg>
+    <svg class="cloud-anim-2 absolute top-14 w-48 h-24 text-white/75" viewBox="0 0 120 60" fill="currentColor">
+      <path d="M25 50h70a20 20 0 0 0 0-40 28 28 0 0 0-54-6A22 22 0 0 0 25 50z"/>
+    </svg>
+    <svg class="cloud-anim-3 absolute top-8 w-28 h-16 text-white/80" viewBox="0 0 120 60" fill="currentColor">
+      <path d="M25 50h70a20 20 0 0 0 0-40 28 28 0 0 0-54-6A22 22 0 0 0 25 50z"/>
+    </svg>
+  </div>
+
+  <!-- Top Right Floating Controls (Audio, Bank Soal, & Fullscreen Icon) -->
+  <header class="relative z-40 w-full px-4 py-2.5 flex items-center justify-between">
+    <!-- Brand Badge -->
+    <div class="flex items-center gap-2.5 bg-white/90 backdrop-blur-md px-4 py-2 rounded-2xl shadow-md border-2 border-amber-300">
+      <div class="w-9 h-9 rounded-xl bg-amber-400 flex items-center justify-center shadow-inner text-xl">
+        🐔
+      </div>
+      <div>
+        <h1 class="font-cartoon text-lg sm:text-xl font-bold text-amber-900 leading-none">
+          TANGKAP & BALAP AYAM
+        </h1>
+        <p class="text-[11px] font-semibold text-amber-700">Media Pembelajaran Interaktif Kelas (IFP Ready)</p>
+      </div>
+    </div>
+
+    <!-- Right Action Icons (Menu, Sound, & Fullscreen Icon at Top Right) -->
+    <div class="flex items-center gap-2">
+      <!-- Back to Home Button (Visible only during Race) -->
+      <button id="btnBackToMenu" onclick="confirmReturnToMenu()" class="hidden btn-3d bg-rose-500 hover:bg-rose-600 text-white font-bold px-3.5 py-2.5 rounded-2xl shadow-[0_4px_0_#9f1239] flex items-center gap-1.5 text-xs sm:text-sm">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+        </svg>
+        <span>Pengaturan</span>
+      </button>
+
+      <!-- Custom Question Editor Button -->
+      <button id="btnOpenEditor" onclick="openQuestionModal()" title="Kelola / Tambah Soal Guru" class="btn-3d bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-3.5 py-2.5 rounded-2xl shadow-[0_4px_0_#3730a3] flex items-center gap-1.5 text-xs sm:text-sm">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+        </svg>
+        <span class="hidden sm:inline">Bank Soal</span>
+      </button>
+
+      <!-- Sound Toggle Button -->
+      <button id="btnSoundToggle" onclick="toggleSound()" title="Suara Efek Game" class="btn-3d bg-white hover:bg-amber-50 text-amber-800 p-2.5 rounded-2xl shadow-[0_4px_0_#d97706] border-2 border-amber-400">
+        <svg id="iconSoundOn" class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/>
+        </svg>
+        <svg id="iconSoundOff" class="w-6 h-6 text-rose-500 hidden" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15zM17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"/>
+        </svg>
+      </button>
+
+      <!-- Fullscreen Toggle Icon (Mandatory Requirement #1: Kanan Atas) -->
+      <button id="btnFullscreen" onclick="toggleFullScreen()" title="Mode Layar Penuh (Fullscreen)" class="btn-3d bg-amber-400 hover:bg-amber-500 text-amber-950 p-2.5 rounded-2xl shadow-[0_4px_0_#b45309] border-2 border-amber-600 flex items-center justify-center">
+        <svg id="iconFsEnter" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
+        </svg>
+        <svg id="iconFsExit" class="w-6 h-6 hidden" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="relative z-20 flex-1 flex flex-col justify-center items-center px-3 py-2 sm:px-6 w-full max-w-[1600px] mx-auto">
+
+    <!-- ==========================================
+         HALAMAN 1: MENU PENGATURAN AWAL (START SCREEN)
+         ========================================== -->
+    <section id="startScreen" class="w-full max-w-5xl bg-white/95 backdrop-blur-md rounded-3xl shadow-2xl border-4 border-amber-400 p-5 sm:p-7 transition-all">
+      
+      <!-- Banner Hero Preview Ayam -->
+      <div class="bg-gradient-to-r from-sky-500 via-indigo-500 to-purple-600 rounded-2xl p-4 sm:p-5 text-white shadow-lg mb-6 flex flex-col md:flex-row items-center justify-between gap-4 relative overflow-hidden">
+        <div class="z-10 text-center md:text-left">
+          <span class="inline-block bg-amber-300 text-amber-950 text-xs font-extrabold px-3 py-1 rounded-full uppercase tracking-wider mb-1.5 shadow">
+            Edisi Kelas Interaktif • SVG Vektor 2D
+          </span>
+          <h2 class="font-cartoon text-2xl sm:text-3xl md:text-4xl font-bold drop-shadow">
+            Ayo Tangkap Ayam Juara! 🏁
+          </h2>
+          <p class="text-sky-100 text-xs sm:text-sm mt-1 max-w-xl">
+            Jawab soal dengan benar agar ayammu berlari <strong>4 langkah maju</strong> menuju keranjang tangkap di garis finis. Jawaban salah membuat ayam diam di tempat!
+          </p>
+        </div>
+
+        <!-- 3 Chicken Avatars Preview (Putih, Kuning, Biru) -->
+        <div class="flex items-end gap-3 z-10 bg-white/15 backdrop-blur-sm px-4 py-2.5 rounded-2xl border border-white/25">
+          <div class="text-center">
+            <div id="previewChickenWhite" class="w-16 h-16 sm:w-20 sm:h-20"></div>
+            <span class="text-[11px] font-bold bg-white text-slate-800 px-2 py-0.5 rounded-full shadow">Putih</span>
+          </div>
+          <div class="text-center">
+            <div id="previewChickenYellow" class="w-16 h-16 sm:w-20 sm:h-20"></div>
+            <span class="text-[11px] font-bold bg-amber-300 text-amber-950 px-2 py-0.5 rounded-full shadow">Kuning</span>
+          </div>
+          <div class="text-center">
+            <div id="previewChickenBlue" class="w-16 h-16 sm:w-20 sm:h-20"></div>
+            <span class="text-[11px] font-bold bg-sky-300 text-sky-950 px-2 py-0.5 rounded-full shadow">Biru</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form Grid Pengaturan Permainan -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        
+        <!-- Kolom Kiri: Mata Pelajaran & Materi -->
+        <div class="space-y-4 bg-amber-50/70 p-4 sm:p-5 rounded-2xl border-2 border-amber-200">
+          <h3 class="font-cartoon text-lg font-bold text-amber-900 flex items-center gap-2">
+            <span class="w-7 h-7 rounded-lg bg-amber-400 text-amber-950 flex items-center justify-center text-sm font-bold">1</span>
+            Pilih Mata Pelajaran & Materi
+          </h3>
+
+          <!-- 1. Pilih Mata Pelajaran -->
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
+              Nama Mata Pelajaran
+            </label>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2" id="subjectButtonsContainer">
+              <button type="button" onclick="selectSubject('informatika')" data-subject="informatika" class="subject-btn btn-3d py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm border-2 flex flex-col items-center gap-1 transition-all">
+                <span class="text-xl">💻</span>
+                <span>Informatika</span>
+              </button>
+              <button type="button" onclick="selectSubject('matematika')" data-subject="matematika" class="subject-btn btn-3d py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm border-2 flex flex-col items-center gap-1 transition-all">
+                <span class="text-xl">📐</span>
+                <span>Matematika</span>
+              </button>
+              <button type="button" onclick="selectSubject('ipa')" data-subject="ipa" class="subject-btn btn-3d py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm border-2 flex flex-col items-center gap-1 transition-all">
+                <span class="text-xl">🔬</span>
+                <span>IPA</span>
+              </button>
+              <button type="button" onclick="selectSubject('ips')" data-subject="ips" class="subject-btn btn-3d py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm border-2 flex flex-col items-center gap-1 transition-all">
+                <span class="text-xl">🌍</span>
+                <span>IPS</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 2. Dropdown Materi Pelajaran (Otomatis Berubah) -->
+          <div>
+            <label for="topicSelect" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
+              Materi Pelajaran (Otomatis Sesuai Mapel)
+            </label>
+            <div class="relative">
+              <select id="topicSelect" onchange="onTopicChange()" class="w-full appearance-none bg-white border-2 border-amber-300 focus:border-amber-500 rounded-xl px-4 py-3 pr-10 font-bold text-slate-800 text-sm sm:text-base shadow-sm focus:outline-none">
+                <!-- Populated dynamically via JS -->
+              </select>
+              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-amber-700">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                </svg>
+              </div>
+            </div>
+            <p id="dbQuestionInfo" class="text-xs text-slate-500 mt-1.5 font-medium">
+              Tersedia <span id="maxDbCountBadge" class="font-bold text-amber-700">10</span> soal dalam database materi ini.
+            </p>
+          </div>
+
+          <!-- 3. Jumlah Soal (Berdasarkan Maksimal Database, Guru Dapat Mengurangi) -->
+          <div class="bg-white p-3.5 rounded-xl border border-amber-200">
+            <div class="flex items-center justify-between mb-2">
+              <label class="text-xs font-bold uppercase tracking-wider text-slate-600">
+                Jumlah Soal Menuju Finis
+              </label>
+              <span class="text-xs font-extrabold bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full">
+                Target: <span id="selectedQuestionCountText">5</span> Soal (<span id="selectedTotalStepsText">20</span> Langkah)
+              </span>
+            </div>
+
+            <div class="flex items-center gap-3">
+              <button type="button" onclick="adjustQuestionCount(-1)" class="btn-3d w-10 h-10 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-900 font-extrabold text-xl flex items-center justify-center border border-amber-300 shadow-sm">
+                −
+              </button>
+              <input id="questionCountSlider" type="range" min="1" max="10" value="5" oninput="onQuestionSliderInput(this.value)" class="flex-1 accent-amber-500 h-2.5 bg-amber-200 rounded-lg cursor-pointer" />
+              <button type="button" onclick="adjustQuestionCount(1)" class="btn-3d w-10 h-10 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-900 font-extrabold text-xl flex items-center justify-center border border-amber-300 shadow-sm">
+                +
+              </button>
+            </div>
+            <div class="flex justify-between text-[11px] text-slate-500 font-semibold mt-1">
+              <span>Min: 1 Soal (4 Langkah)</span>
+              <span id="maxSliderLabel">Maks Database: 10 Soal (40 Langkah)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Kolom Kanan: Acak Soal & Jumlah Pemain -->
+        <div class="space-y-4 bg-sky-50/70 p-4 sm:p-5 rounded-2xl border-2 border-sky-200 flex flex-col justify-between">
+          <div class="space-y-4">
+            <h3 class="font-cartoon text-lg font-bold text-sky-900 flex items-center gap-2">
+              <span class="w-7 h-7 rounded-lg bg-sky-400 text-sky-950 flex items-center justify-center text-sm font-bold">2</span>
+              Pengaturan Arena & Pemain
+            </h3>
+
+            <!-- 4. Pengaturan Acak Soal (Ya / Tidak) -->
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
+                Acak Urutan Soal?
+              </label>
+              <div class="grid grid-cols-2 gap-3">
+                <button type="button" id="btnRandomYes" onclick="setRandomize(true)" class="btn-3d py-2.5 px-4 rounded-xl font-bold text-sm border-2 flex items-center justify-center gap-2 transition-all">
+                  <span>🔀</span>
+                  <span>Ya (Diacak per Siswa)</span>
+                </button>
+                <button type="button" id="btnRandomNo" onclick="setRandomize(false)" class="btn-3d py-2.5 px-4 rounded-xl font-bold text-sm border-2 flex items-center justify-center gap-2 transition-all">
+                  <span>📋</span>
+                  <span>Tidak (Berurutan)</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- 5. Jumlah Pemain (1, 2, atau 3 Pemain) -->
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
+                Jumlah Pemain (Pembagian Layar Otomatis)
+              </label>
+              <div class="grid grid-cols-3 gap-2.5">
+                <button type="button" onclick="setPlayerCount(1)" data-players="1" class="player-count-btn btn-3d py-3 px-3 rounded-xl font-bold text-xs sm:text-sm border-2 flex flex-col items-center gap-1 transition-all">
+                  <span class="text-lg">👤 1 Pemain</span>
+                  <span class="text-[11px] font-medium opacity-80">1 Layar Penuh</span>
+                </button>
+                <button type="button" onclick="setPlayerCount(2)" data-players="2" class="player-count-btn btn-3d py-3 px-3 rounded-xl font-bold text-xs sm:text-sm border-2 flex flex-col items-center gap-1 transition-all">
+                  <span class="text-lg">👥 2 Pemain</span>
+                  <span class="text-[11px] font-medium opacity-80">Layar Dibagi 2</span>
+                </button>
+                <button type="button" onclick="setPlayerCount(3)" data-players="3" class="player-count-btn btn-3d py-3 px-3 rounded-xl font-bold text-xs sm:text-sm border-2 flex flex-col items-center gap-1 transition-all">
+                  <span class="text-lg">👨‍👩‍👦 3 Pemain</span>
+                  <span class="text-[11px] font-medium opacity-80">Layar Dibagi 3</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Kustomisasi Nama Pemain & Warna Ayam (Putih, Kuning, Biru) -->
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
+                Nama Siswa & Karakter Ayam
+              </label>
+              <div id="playerNamesInputs" class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <!-- Diisi dinamis sesuai jumlah pemain (1, 2, 3) -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Tombol Mulai Perlombaan -->
+          <div class="pt-2">
+            <button type="button" onclick="startRaceWithCountdown()" class="btn-3d w-full bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-cartoon text-xl sm:text-2xl font-bold py-4 px-6 rounded-2xl shadow-[0_6px_0_#15803d] border-2 border-emerald-300 flex items-center justify-center gap-3">
+              <span>🏁 MULAI BALAP & TANGKAP AYAM!</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==========================================
+         HALAMAN 2: ARENA BALAPAN MULTI-LAYAR (GAME SCREEN)
+         ========================================== -->
+    <section id="gameScreen" class="hidden w-full flex-1 flex flex-col justify-between gap-2">
+      <!-- Info Bar Atas Saat Permainan Berlangsung -->
+      <div class="bg-white/90 backdrop-blur-md px-4 py-2 rounded-2xl shadow border-2 border-amber-300 flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm">
+        <div class="flex items-center gap-2 sm:gap-4 flex-wrap">
+          <span id="hudSubjectBadge" class="font-extrabold bg-indigo-100 text-indigo-800 px-3 py-1 rounded-xl">
+            💻 Informatika
+          </span>
+          <span id="hudTopicBadge" class="font-bold text-slate-700">
+            Materi: Algoritma & Pemrograman
+          </span>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="bg-amber-100 text-amber-900 font-bold px-3 py-1 rounded-xl border border-amber-300">
+            🎯 Target Finis: <strong id="hudTargetSteps">20</strong> Langkah (<strong id="hudTargetQuestions">5</strong> Soal Benar)
+          </span>
+          <span class="bg-sky-100 text-sky-900 font-bold px-3 py-1 rounded-xl border border-sky-300">
+            ⏱️ Waktu: <strong id="hudTimer">00:00</strong>
+          </span>
+        </div>
+      </div>
+
+      <!-- Kontainer Pembagian Layar Pemain (1, 2, atau 3 Kolom) -->
+      <div id="playersArenaGrid" class="grid grid-cols-1 gap-3 flex-1 w-full items-stretch">
+        <!-- Panel tiap pemain di-render dinamis oleh JavaScript -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Overlay Hitung Mundur (3, 2, 1, MULAI!) -->
+  <div id="countdownOverlay" class="hidden fixed inset-0 z-50 bg-slate-900/75 backdrop-blur-sm flex flex-col items-center justify-center p-4">
+    <div class="text-center">
+      <p class="font-cartoon text-amber-300 text-2xl sm:text-3xl mb-2 tracking-wider uppercase">Siap-Siap Tangkap Ayammu!</p>
+      <div id="countdownNumber" class="font-cartoon text-8xl sm:text-9xl font-extrabold text-white drop-shadow-[0_8px_0_#d97706] animate-bounce">
+        3
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Podium Pemenang & Evaluasi Skor -->
+  <div id="winnerModal" class="hidden fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 border-4 border-amber-400 shadow-2xl text-center relative my-auto">
+      <div class="inline-flex items-center gap-2 bg-amber-100 text-amber-900 font-extrabold px-4 py-1.5 rounded-full text-xs sm:text-sm border border-amber-300 mb-3">
+        🏆 AYAM BERHASIL DITANGKAP DI GARIS FINIS!
+      </div>
+
+      <h2 id="winnerTitleText" class="font-cartoon text-3xl sm:text-4xl font-bold text-slate-800">
+        Selamat, Pemain 1 Menang!
+      </h2>
+      <p id="winnerSubtitleText" class="text-slate-600 text-sm mt-1">
+        Berhasil mencapai garis finis dan menangkap ayam pertama kali!
+      </p>
+
+      <!-- Visual Kartun Ayam Juara -->
+      <div class="my-5 flex justify-center">
+        <div class="relative bg-gradient-to-b from-amber-100 to-amber-200 p-5 rounded-3xl border-4 border-amber-400 shadow-inner flex flex-col items-center">
+          <div id="winnerChickenAvatar" class="w-28 h-28 is-winner"></div>
+          <span id="winnerChickenBadge" class="mt-2 font-cartoon text-base font-bold bg-amber-400 text-amber-950 px-4 py-1 rounded-full shadow">
+            Juara 1 🥇
+          </span>
+        </div>
+      </div>
+
+      <!-- Tabel Rekap Statistik Semua Pemain -->
+      <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200 mb-6 text-left">
+        <h4 class="text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-2.5 text-center">
+          📊 Statistik Hasil Belajar Siswa
+        </h4>
+        <div id="winnerStatsContainer" class="space-y-2">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <div class="flex flex-col sm:flex-row gap-3 justify-center">
+        <button onclick="replaySameSettings()" class="btn-3d flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-cartoon text-lg font-bold py-3.5 px-6 rounded-2xl shadow-[0_5px_0_#15803d]">
+          🔄 Main Lagi (Soal Baru)
+        </button>
+        <button onclick="returnToMenuFromWinner()" class="btn-3d flex-1 bg-amber-400 hover:bg-amber-500 text-amber-950 font-cartoon text-lg font-bold py-3.5 px-6 rounded-2xl shadow-[0_5px_0_#b45309]">
+          ⚙️ Ubah Pengaturan / Mapel
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Konfirmasi Kembali ke Pengaturan (Pengganti confirm() bawaan browser) -->
+  <div id="confirmModal" class="hidden fixed inset-0 z-50 bg-slate-900/75 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 border-4 border-rose-400 shadow-2xl text-center">
+      <div class="w-14 h-14 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center mx-auto mb-3 text-3xl">
+        ⚠️
+      </div>
+      <h3 class="font-cartoon text-2xl font-bold text-slate-800">Hentikan Perlombaan?</h3>
+      <p class="text-sm text-slate-600 mt-1 mb-5">
+        Perlombaan yang sedang berjalan akan dihentikan dan Anda akan kembali ke halaman pengaturan awal.
+      </p>
+      <div class="flex gap-3">
+        <button onclick="closeConfirmModal()" class="btn-3d flex-1 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-3 rounded-xl">
+          Lanjut Main
+        </button>
+        <button onclick="executeReturnToMenu()" class="btn-3d flex-1 bg-rose-500 hover:bg-rose-600 text-white font-bold py-3 rounded-xl shadow-[0_4px_0_#9f1239]">
+          Ya, Ke Menu Awal
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Bank Soal Guru (Tambah/Edit Soal Sendiri) -->
+  <div id="questionEditorModal" class="hidden fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-3xl max-w-3xl w-full p-5 sm:p-6 border-4 border-indigo-400 shadow-2xl my-auto max-h-[90vh] flex flex-col">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-200">
+        <div>
+          <h3 class="font-cartoon text-xl sm:text-2xl font-bold text-indigo-950">📚 Bank Soal Guru (Kustomisasi Soal)</h3>
+          <p class="text-xs text-slate-500">Tambahkan soal baru ke materi yang sedang dipilih atau lihat daftar soal aktif.</p>
+        </div>
+        <button onclick="closeQuestionModal()" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-rose-100 text-slate-600 hover:text-rose-600 font-bold text-lg flex items-center justify-center">
+          ✕
+        </button>
+      </div>
+
+      <div class="overflow-y-auto flex-1 py-4 space-y-4 pr-1">
+        <!-- Form Tambah Soal Cepat -->
+        <div class="bg-indigo-50/80 p-4 rounded-2xl border border-indigo-200 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-extrabold uppercase tracking-wider text-indigo-800">
+              ➕ Tambah Soal ke Materi Aktif (<span id="editorActiveTopicLabel"></span>)
+            </span>
+          </div>
+          <input id="newQText" type="text" placeholder="Tulis pertanyaan baru di sini..." class="w-full px-3.5 py-2.5 rounded-xl border border-indigo-300 text-sm font-semibold focus:outline-none focus:border-indigo-600" />
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <input id="newQOpt0" type="text" placeholder="Pilihan A" class="px-3 py-2 rounded-xl border border-slate-300 text-xs sm:text-sm" />
+            <input id="newQOpt1" type="text" placeholder="Pilihan B" class="px-3 py-2 rounded-xl border border-slate-300 text-xs sm:text-sm" />
+            <input id="newQOpt2" type="text" placeholder="Pilihan C" class="px-3 py-2 rounded-xl border border-slate-300 text-xs sm:text-sm" />
+            <input id="newQOpt3" type="text" placeholder="Pilihan D" class="px-3 py-2 rounded-xl border border-slate-300 text-xs sm:text-sm" />
+          </div>
+          <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+            <div class="flex items-center gap-2">
+              <label class="text-xs font-bold text-slate-700">Kunci Jawaban Benar:</label>
+              <select id="newQAnswer" class="px-3 py-1.5 rounded-lg border border-indigo-300 font-bold text-xs bg-white">
+                <option value="0">Opsi A</option>
+                <option value="1">Opsi B</option>
+                <option value="2">Opsi C</option>
+                <option value="3">Opsi D</option>
+              </select>
+            </div>
+            <button onclick="addCustomQuestion()" class="btn-3d bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm px-4 py-2 rounded-xl shadow-[0_3px_0_#312e81]">
+              + Simpan Soal ke Database
+            </button>
+          </div>
+          <p id="editorFeedbackMsg" class="text-xs font-bold text-emerald-600 hidden"></p>
+        </div>
+
+        <!-- Daftar Soal dalam Materi Saat Ini -->
+        <div>
+          <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
+            Daftar Soal Tersedia (<span id="editorQuestionListCount">0</span> Soal)
+          </h4>
+          <div id="editorQuestionList" class="space-y-2 max-h-56 overflow-y-auto pr-1">
+            <!-- Diisi otomatis via JS -->
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-3 border-t border-slate-200 flex justify-end">
+        <button onclick="closeQuestionModal()" class="btn-3d bg-slate-800 hover:bg-slate-900 text-white font-bold px-5 py-2.5 rounded-xl text-sm">
+          Selesai & Tutup
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* =========================================================================
+       1. DATABASE SOAL MATA PELAJARAN (INFORMATIKA, MATEMATIKA, IPA, IPS)
+       ========================================================================= */
+    const QUESTION_DATABASE = {
+      informatika: {
+        label: "Informatika",
+        icon: "💻",
+        topics: {
+          "Algoritma & Pemrograman Dasar": [
+            { q: "Urutan langkah-langkah logis dan sistematis untuk menyelesaikan suatu masalah disebut...", opts: ["Algoritma", "Hardware", "Browser", "RAM"], a: 0 },
+            { q: "Simbol belah ketupat (diamond) pada diagram alir (flowchart) berfungsi untuk...", opts: ["Proses perhitungan", "Percabangan / Keputusan (Ya/Tidak)", "Mulai dan Selesai", "Input data"], a: 1 },
+            { q: "Tipe data yang digunakan untuk menyimpan nilai teks atau kumpulan karakter adalah...", opts: ["Integer", "Boolean", "String", "Float"], a: 2 },
+            { q: "Manakah di bawah ini yang merupakan struktur perulangan (looping) dalam pemrograman?", opts: ["if - else", "for dan while", "switch - case", "import"], a: 1 },
+            { q: "Nilai dari tipe data Boolean hanya memiliki dua kemungkinan, yaitu...", opts: ["0 dan 100", "A dan Z", "True dan False", "Plus dan Minus"], a: 2 },
+            { q: "Proses mencari dan memperbaiki kesalahan (error/bug) pada kode program disebut...", opts: ["Compiling", "Debugging", "Rendering", "Uploading"], a: 1 },
+            { q: "Pada HTML, tag yang digunakan untuk membuat judul berukuran paling besar adalah...", opts: ["<h6>", "<p>", "<h1>", "<title>"], a: 2 },
+            { q: "Bahasa yang digunakan untuk mengatur warna, tata letak, dan animasi halaman web adalah...", opts: ["CSS", "SQL", "PHP", "C++"], a: 0 },
+            { q: "Operator '==' dalam pemrograman digunakan untuk...", opts: ["Menjumlahkan nilai", "Membandingkan kesamaan dua nilai", "Menghapus variabel", "Mengalikan angka"], a: 1 },
+            { q: "Tempat penyimpanan nilai sementara di dalam memori program yang memiliki nama disebut...", opts: ["Variabel", "Monitor", "Folder", "Pixel"], a: 0 }
+          ],
+          "Sistem Komputer & Perangkat Keras": [
+            { q: "Otak utama komputer yang bertugas memproses seluruh instruksi dan perhitungan adalah...", opts: ["CPU (Processor)", "Mouse", "Speaker", "Flashdisk"], a: 0 },
+            { q: "Manakah yang termasuk perangkat masukan (Input Device) pada komputer?", opts: ["Monitor dan Printer", "Keyboard dan Mouse", "Proyektor dan Speaker", "RAM dan Harddisk"], a: 1 },
+            { q: "Memori komputer yang bersifat sementara (data hilang saat listrik mati) adalah...", opts: ["SSD", "Harddisk", "RAM", "Flashdisk"], a: 2 },
+            { q: "Sistem bilangan yang digunakan oleh komputer di tingkat mesin (terdiri dari 0 dan 1) adalah...", opts: ["Desimal", "Biner", "Oktal", "Heksadesimal"], a: 1 },
+            { q: "Bilangan biner 101 jika diubah ke bilangan desimal bernilai...", opts: ["3", "4", "5", "6"], a: 2 },
+            { q: "Contoh perangkat lunak Sistem Operasi (Operating System) adalah...", opts: ["Microsoft Word", "Windows, Linux, dan Android", "Google Chrome", "Canva"], a: 1 },
+            { q: "Komponen komputer yang bertugas mengolah grafis 3D dan tampilan visual ke layar adalah...", opts: ["GPU / VGA Card", "Power Supply", "Sound Card", "LAN Card"], a: 0 },
+            { q: "Ukuran kapasitas penyimpanan 1 Gigabyte (GB) setara dengan sekitar...", opts: ["100 Kilobyte", "1.024 Megabyte (MB)", "10 Terabyte", "512 Byte"], a: 1 }
+          ],
+          "Jaringan Komputer & Internet Aman": [
+            { q: "Kepanjangan dari LAN dalam jaringan komputer adalah...", opts: ["Local Area Network", "Large Access Node", "Link Area Number", "Local Application Net"], a: 0 },
+            { q: "Protokol web yang sudah dienkripsi sehingga lebih aman saat bertransaksi di internet adalah...", opts: ["HTTP", "FTP", "HTTPS", "SMTP"], a: 2 },
+            { q: "Upaya penipuan online dengan menyamar sebagai situs resmi untuk mencuri password disebut...", opts: ["Phishing", "Browsing", "Streaming", "Routing"], a: 0 },
+            { q: "Perangkat yang berfungsi menghubungkan beberapa jaringan berbeda dan meneruskan paket data adalah...", opts: ["Router", "Scanner", "Plotter", "Webcam"], a: 0 },
+            { q: "Kombinasi kata sandi (password) yang paling kuat dan aman di bawah ini adalah...", opts: ["12345678", "tanggal_lahir", "Ay4m#Juara2025!", "abcd1234"], a: 2 },
+            { q: "Alamat unik berupa deretan angka yang dimiliki setiap perangkat dalam jaringan disebut...", opts: ["IP Address", "Kode Pos", "URL Gambar", "Username"], a: 0 },
+            { q: "Fitur keamanan yang meminta kode OTP tambahan selain password saat login disebut...", opts: ["Two-Factor Authentication (2FA)", "Auto Login", "Clear Cache", "Incognito Mode"], a: 0 },
+            { q: "Jaringan komputer yang mencakup area sangat luas antarnegara atau seluruh dunia disebut...", opts: ["PAN", "LAN", "MAN", "WAN (Internet)"], a: 3 }
+          ]
+        }
+      },
+
+      matematika: {
+        label: "Matematika",
+        icon: "📐",
+        topics: {
+          "Operasi Hitung & Bilangan Bulat": [
+            { q: "Hasil dari 15 × 4 + 20 adalah...", opts: ["70", "80", "90", "100"], a: 1 },
+            { q: "Hasil dari (-18) + 30 adalah...", opts: ["-48", "-12", "12", "48"], a: 2 },
+            { q: "Hasil dari 144 ÷ 12 × 3 adalah...", opts: ["4", "24", "36", "48"], a: 2 },
+            { q: "Nilai dari 8² + 6² adalah...", opts: ["28", "64", "100", "144"], a: 2 },
+            { q: "Akar kuadrat dari √225 adalah...", opts: ["13", "15", "17", "25"], a: 1 },
+            { q: "Hasil dari 50 - (-25) adalah...", opts: ["25", "75", "-25", "-75"], a: 1 },
+            { q: "FPB dari bilangan 24 dan 36 adalah...", opts: ["6", "8", "12", "24"], a: 2 },
+            { q: "KPK dari bilangan 6 dan 8 adalah...", opts: ["14", "18", "24", "48"], a: 2 },
+            { q: "Hasil dari 25% × 200 adalah...", opts: ["25", "40", "50", "75"], a: 2 },
+            { q: "Pecahan desimal dari 3/4 adalah...", opts: ["0,25", "0,50", "0,75", "0,80"], a: 2 }
+          ],
+          "Bangun Datar & Geometri": [
+            { q: "Luas persegi yang memiliki panjang sisi 9 cm adalah...", opts: ["36 cm²", "45 cm²", "81 cm²", "90 cm²"], a: 2 },
+            { q: "Keliling persegi panjang dengan panjang 12 cm dan lebar 8 cm adalah...", opts: ["20 cm", "40 cm", "96 cm", "48 cm"], a: 1 },
+            { q: "Sebuah segitiga memiliki alas 10 cm dan tinggi 14 cm. Luasnya adalah...", opts: ["70 cm²", "140 cm²", "24 cm²", "48 cm²"], a: 0 },
+            { q: "Jumlah seluruh sudut di dalam sebuah segitiga adalah...", opts: ["90°", "180°", "270°", "360°"], a: 1 },
+            { q: "Rumus untuk mencari luas lingkaran dengan jari-jari r adalah...", opts: ["2 × π × r", "π × r²", "p × l", "s × s × s"], a: 1 },
+            { q: "Kubus yang memiliki panjang rusuk 5 cm memiliki volume sebesar...", opts: ["25 cm³", "75 cm³", "125 cm³", "150 cm³"], a: 2 },
+            { q: "Pada segitiga siku-siku, jika sisi tegak 3 cm dan 4 cm, maka sisi miringnya adalah...", opts: ["5 cm", "6 cm", "7 cm", "12 cm"], a: 0 },
+            { q: "Bangun ruang yang memiliki alas dan tutup berbentuk lingkaran sama besar disebut...", opts: ["Kerucut", "Tabung (Silinder)", "Limas", "Bola"], a: 1 }
+          ],
+          "Aljabar & Perbandingan": [
+            { q: "Jika 3x + 5 = 20, maka nilai x adalah...", opts: ["3", "4", "5", "6"], a: 2 },
+            { q: "Bentuk sederhana dari 4a + 7b + 2a - 3b adalah...", opts: ["6a + 4b", "6a + 10b", "2a + 4b", "10ab"], a: 0 },
+            { q: "Jika 2x - 4 = 10, maka nilai x adalah...", opts: ["3", "5", "7", "8"], a: 2 },
+            { q: "Perbandingan ayam putih dan kuning adalah 2 : 3. Jika jumlahnya 25 ekor, banyak ayam putih adalah...", opts: ["10 ekor", "12 ekor", "15 ekor", "20 ekor"], a: 0 },
+            { q: "Jika harga 3 buku tulis adalah Rp15.000, maka harga 5 buku tulis yang sama adalah...", opts: ["Rp20.000", "Rp25.000", "Rp30.000", "Rp35.000"], a: 1 },
+            { q: "Nilai dari 2(x + 4) jika x = 6 adalah...", opts: ["16", "18", "20", "24"], a: 2 },
+            { q: "Rata-rata (mean) dari data nilai: 70, 80, 90, 80 adalah...", opts: ["75", "80", "82", "85"], a: 1 },
+            { q: "Nilai yang paling sering muncul dalam sekumpulan data statistika disebut...", opts: ["Mean", "Median", "Modus", "Kuartil"], a: 2 }
+          ]
+        }
+      },
+
+      ipa: {
+        label: "Ilmu Pengetahuan Alam (IPA)",
+        icon: "🔬",
+        topics: {
+          "Makhluk Hidup & Ekosistem": [
+            { q: "Proses pembuatan makanan pada tumbuhan hijau dengan bantuan cahaya matahari disebut...", opts: ["Respirasi", "Fotosintesis", "Adaptasi", "Metamorfosis"], a: 1 },
+            { q: "Gas yang dihasilkan tumbuhan saat fotosintesis dan sangat dibutuhkan manusia untuk bernapas adalah...", opts: ["Karbondioksida (CO₂)", "Oksigen (O₂)", "Nitrogen", "Helium"], a: 1 },
+            { q: "Ayam berkembang biak dengan cara bertelur, yang dalam istilah biologi disebut...", opts: ["Vivipar", "Ovipar", "Ovovivipar", "Vegetatif"], a: 1 },
+            { q: "Dalam rantai makanan, tumbuhan hijau berperan sebagai...", opts: ["Produsen", "Konsumen I", "Konsumen Puncak", "Pengurai (Dekomposer)"], a: 0 },
+            { q: "Hubungan antara bunga dan lebah madu merupakan contoh simbiosis...", opts: ["Parasitisme", "Komensalisme", "Mutualisme", "Amensalisme"], a: 2 },
+            { q: "Organel sel yang berfungsi sebagai penghasil energi (respirasi sel) adalah...", opts: ["Mitokondria", "Ribosom", "Lisosom", "Dinding Sel"], a: 0 },
+            { q: "Hewan pemakan tumbuhan sekaligus pemakan daging (seperti ayam) dikelompokkan sebagai...", opts: ["Herbivora", "Karnivora", "Omnivora", "Insektivora"], a: 2 },
+            { q: "Perubahan bentuk serangga dari telur -> ulat -> kepompong -> kupu-kupu disebut...", opts: ["Metamorfosis Sempurna", "Metamorfosis Tidak Sempurna", "Fotosintesis", "Simbiosis"], a: 0 }
+          ],
+          "Energi, Gaya & Fisika Dasar": [
+            { q: "Satuan Internasional (SI) untuk besaran Gaya adalah...", opts: ["Joule", "Watt", "Newton", "Pascal"], a: 2 },
+            { q: "Buah kelapa yang jatuh dari pohon ke tanah dipengaruhi oleh gaya...", opts: ["Magnet", "Gravitasi Bumi", "Pegas", "Listrik Statis"], a: 1 },
+            { q: "Perubahan energi yang terjadi pada kipas angin listrik saat dinyalakan adalah...", opts: ["Listrik menjadi Gerak", "Listrik menjadi Kimia", "Gerak menjadi Cahaya", "Kimia menjadi Panas"], a: 0 },
+            { q: "Benda yang dapat menghantarkan panas dan arus listrik dengan sangat baik disebut...", opts: ["Isolator", "Konduktor", "Semikonduktor", "Resistor"], a: 1 },
+            { q: "Perubahan wujud benda padat menjadi gas secara langsung (contoh: kapur barus) disebut...", opts: ["Mencair", "Menguap", "Menyublim", "Membeku"], a: 2 },
+            { q: "Alat ukur yang digunakan untuk mengukur suhu suatu benda adalah...", opts: ["Termometer", "Barometer", "Speedometer", "Dinamometer"], a: 0 },
+            { q: "Jika sebuah mobil menempuh jarak 120 km dalam waktu 2 jam, kecepatannya adalah...", opts: ["40 km/jam", "60 km/jam", "80 km/jam", "240 km/jam"], a: 1 },
+            { q: "Cermin yang digunakan pada kaca spion kendaraan agar tampak luas adalah cermin...", opts: ["Datar", "Cekung", "Cembung", "Prisma"], a: 2 }
+          ],
+          "Tata Surya & Bumi": [
+            { q: "Pusat dari sistem Tata Surya kita adalah...", opts: ["Bumi", "Bulan", "Matahari", "Jupiter"], a: 2 },
+            { q: "Planet terbesar di dalam sistem Tata Surya adalah...", opts: ["Mars", "Bumi", "Saturnus", "Jupiter"], a: 3 },
+            { q: "Perputaran Bumi pada porosnya yang menyebabkan terjadinya siang dan malam disebut...", opts: ["Revolusi Bumi", "Rotasi Bumi", "Gerhana Bulan", "Gravitasi"], a: 1 },
+            { q: "Planet yang mendapat julukan sebagai 'Planet Merah' adalah...", opts: ["Venus", "Mars", "Merkurius", "Neptunus"], a: 1 },
+            { q: "Lapisan atmosfer Bumi yang melindungi kita dari radiasi sinar ultraviolet (UV) Matahari adalah...", opts: ["Lapisan Ozon", "Inti Bumi", "Kerak Bumi", "Hidrosfer"], a: 0 },
+            { q: "Satelit alami yang dimiliki oleh planet Bumi adalah...", opts: ["Phobos", "Titan", "Bulan", "Europa"], a: 2 },
+            { q: "Peristiwa ketika posisi Bulan berada tepat di antara Matahari dan Bumi menyebabkan...", opts: ["Gerhana Matahari", "Gerhana Bulan", "Tahun Kabisat", "Angin Muson"], a: 0 },
+            { q: "Planet yang terkenal memiliki cincin indah yang mengelilinginya adalah...", opts: ["Uranus", "Saturnus", "Merkurius", "Venus"], a: 1 }
+          ]
+        }
+      },
+
+      ips: {
+        label: "Ilmu Pengetahuan Sosial (IPS)",
+        icon: "🌍",
+        topics: {
+          "Geografi Indonesia & ASEAN": [
+            { q: "Secara geografis, Indonesia terletak di antara dua benua, yaitu...", opts: ["Asia dan Australia", "Asia dan Eropa", "Afrika dan Amerika", "Australia dan Antartika"], a: 0 },
+            { q: "Garis lintang 0° yang membelah bumi menjadi bagian utara dan selatan serta melewati Pontianak disebut...", opts: ["Garis Bujur", "Garis Khatulistiwa (Ekuator)", "Garis Wallace", "Garis Weber"], a: 1 },
+            { q: "Organisasi kerja sama negara-negara di kawasan Asia Tenggara disebut...", opts: ["PBB", "ASEAN", "NATO", "OPEC"], a: 1 },
+            { q: "Ibu kota negara Thailand adalah...", opts: ["Manila", "Kuala Lumpur", "Bangkok", "Hanoi"], a: 2 },
+            { q: "Gunung tertinggi di Indonesia yang berada di pegunungan Jayawijaya Papua adalah...", opts: ["Puncak Jaya (Cartenz)", "Gunung Semeru", "Gunung Kerinci", "Gunung Rinjani"], a: 0 },
+            { q: "Angin yang berganti arah setiap 6 bulan sekali dan memengaruhi musim hujan/kemarau di Indonesia adalah...", opts: ["Angin Muson", "Angin Puting Beliung", "Angin Darat", "Angin Fohn"], a: 0 },
+            { q: "Negara anggota ASEAN yang wilayahnya paling kecil tetapi menjadi pusat perdagangan maju adalah...", opts: ["Singapura", "Laos", "Myanmar", "Kamboja"], a: 0 },
+            { q: "Pembagian waktu di Indonesia dibagi menjadi 3 zona waktu, yaitu...", opts: ["WIB, WITA, dan WIT", "GMT, UTC, dan WIB", "Barat, Utara, Selatan", "Pagi, Siang, Malam"], a: 0 }
+          ],
+          "Kegiatan Ekonomi & Sosial": [
+            { q: "Kegiatan menghasilkan atau menambah nilai guna suatu barang/jasa disebut...", opts: ["Konsumsi", "Distribusi", "Produksi", "Inflasi"], a: 2 },
+            { q: "Kegiatan menyalurkan barang dari produsen hingga sampai ke tangan konsumen disebut...", opts: ["Produksi", "Distribusi", "Konsumsi", "Investasi"], a: 1 },
+            { q: "Badan usaha yang beranggotakan orang-seorang dengan asas kekeluargaan dan gotong royong adalah...", opts: ["Koperasi", "PT", "CV", "Firma"], a: 0 },
+            { q: "Bapak Koperasi Indonesia adalah...", opts: ["Ir. Soekarno", "Drs. Mohammad Hatta", "Ki Hajar Dewantara", "Jenderal Sudirman"], a: 1 },
+            { q: "Kegiatan membeli barang dari luar negeri ke dalam negeri disebut...", opts: ["Ekspor", "Impor", "Barter", "Grosir"], a: 1 },
+            { q: "Bank yang bertugas mencetak dan mengatur peredaran mata uang Rupiah di Indonesia adalah...", opts: ["Bank Indonesia (BI)", "Bank Perkreditan", "Koperasi Pasar", "Pegadaian"], a: 0 },
+            { q: "Alat pembayaran sah yang berlaku di wilayah Negara Kesatuan Republik Indonesia adalah...", opts: ["Ringgit", "Rupiah", "Dolar", "Yen"], a: 1 },
+            { q: "Interaksi sosial hanya dapat terjadi apabila memenuhi dua syarat utama, yaitu...", opts: ["Kontak Sosial dan Komunikasi", "Uang dan Barang", "Pasar dan Toko", "Surat dan Telepon"], a: 0 }
+          ],
+          "Sejarah Kemerdekaan & Kebudayaan": [
+            { q: "Proklamasi Kemerdekaan Republik Indonesia dibacakan pada tanggal...", opts: ["1 Juni 1945", "17 Agustus 1945", "28 Oktober 1928", "10 November 1945"], a: 1 },
+            { q: "Tokoh yang mengetik naskah Proklamasi Kemerdekaan Indonesia adalah...", opts: ["Sayuti Melik", "Achmad Soebardjo", "Sukarni", "Laksamana Maeda"], a: 0 },
+            { q: "Tanggal 10 November diperingati sebagai Hari Pahlawan untuk mengenang pertempuran besar di kota...", opts: ["Bandung", "Surabaya", "Semarang", "Medan"], a: 1 },
+            { q: "Semboyan Negara Indonesia 'Bhinneka Tunggal Ika' diambil dari kitab Sutasoma karangan...", opts: ["Mpu Tantular", "Mpu Prapanca", "Mpu Gandring", "Gajah Mada"], a: 0 },
+            { q: "Candi Buddha terbesar di dunia yang terletak di Magelang, Jawa Tengah adalah...", opts: ["Candi Prambanan", "Candi Borobudur", "Candi Kalasan", "Candi Mendut"], a: 1 },
+            { q: "Rumah adat Gadang yang memiliki atap melengkung seperti tanduk kerbau berasal dari provinsi...", opts: ["Sumatera Barat", "Sumatera Utara", "Aceh", "Riau"], a: 0 },
+            { q: "Ikrar pemuda Indonesia pada tanggal 28 Oktober 1928 dikenal dengan peristiwa...", opts: ["Sumpah Pemuda", "Kebangkitan Nasional", "Rengasdengklok", "Bandung Lautan Api"], a: 0 },
+            { q: "Lagu kebangsaan 'Indonesia Raya' diciptakan oleh...", opts: ["W.R. Supratman", "Ismail Marzuki", "Ibu Sud", "Kusbini"], a: 0 }
+          ]
+        }
+      }
+    };
+
+    /* =========================================================================
+       2. KONFIGURASI WARNA KARAKTER AYAM (PUTIH, KUNING, BIRU)
+       ========================================================================= */
+    const CHICKEN_THEMES = [
+      {
+        id: 'white',
+        name: 'Ayam Putih',
+        defaultPlayerName: 'Tim Ayam Putih',
+        bodyFill: '#FFFFFF',
+        bodyShade: '#E2E8F0',
+        wingFill: '#F1F5F9',
+        tailFill: '#CBD5E1',
+        crestFill: '#EF4444',
+        beakFill: '#F59E0B',
+        strokeColor: '#334155',
+        panelBorder: 'border-slate-300',
+        panelBg: 'bg-white/95',
+        headerBg: 'bg-slate-800 text-white',
+        badgeBg: 'bg-slate-100 text-slate-800 border-slate-300',
+        accentBtn: 'bg-slate-700 hover:bg-slate-800 text-white shadow-[0_4px_0_#1e293b]'
+      },
+      {
+        id: 'yellow',
+        name: 'Ayam Kuning',
+        defaultPlayerName: 'Tim Ayam Kuning',
+        bodyFill: '#FACC15',
+        bodyShade: '#EAB308',
+        wingFill: '#FEF08A',
+        tailFill: '#CA8A04',
+        crestFill: '#DC2626',
+        beakFill: '#EA580C',
+        strokeColor: '#713F12',
+        panelBorder: 'border-amber-400',
+        panelBg: 'bg-amber-50/95',
+        headerBg: 'bg-amber-500 text-amber-950',
+        badgeBg: 'bg-amber-100 text-amber-900 border-amber-400',
+        accentBtn: 'bg-amber-500 hover:bg-amber-600 text-amber-950 shadow-[0_4px_0_#b45309]'
+      },
+      {
+        id: 'blue',
+        name: 'Ayam Biru',
+        defaultPlayerName: 'Tim Ayam Biru',
+        bodyFill: '#38BDF8',
+        bodyShade: '#0284C7',
+        wingFill: '#BAE6FD',
+        tailFill: '#0369A1',
+        crestFill: '#F43F5E',
+        beakFill: '#F59E0B',
+        strokeColor: '#0C4A6E',
+        panelBorder: 'border-sky-400',
+        panelBg: 'bg-sky-50/95',
+        headerBg: 'bg-sky-600 text-white',
+        badgeBg: 'bg-sky-100 text-sky-900 border-sky-400',
+        accentBtn: 'bg-sky-600 hover:bg-sky-700 text-white shadow-[0_4px_0_#0369a1]'
+      }
+    ];
+
+    /* =========================================================================
+       3. GENERATOR SVG VEKTOR KARTUN AYAM 2D (DENGAN BAGIAN TUBUH TERPISAH)
+       ========================================================================= */
+    function generateChickenSVG(themeIndex, isDizzy = false) {
+      const t = CHICKEN_THEMES[themeIndex] || CHICKEN_THEMES[0];
+      return `
+        <svg class="chicken-svg w-full h-full overflow-visible drop-shadow-md" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Bayangan Tanah -->
+          <ellipse cx="60" cy="108" rx="28" ry="6" fill="rgba(0,0,0,0.18)" />
+
+          <!-- Partikel Debu Saat Lari -->
+          <circle class="dust-particle opacity-0" cx="22" cy="102" r="7" fill="#FEF3C7" />
+          <circle class="dust-particle opacity-0" cx="14" cy="94" r="5" fill="#FDE68A" />
+
+          <!-- Kaki Kiri (Belakang) -->
+          <g class="svg-leg-left">
+            <path d="M52 84 L48 104 M48 104 L42 106 M48 104 L55 106" stroke="${t.beakFill}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+          </g>
+
+          <!-- Kaki Kanan (Depan) -->
+          <g class="svg-leg-right">
+            <path d="M68 84 L72 104 M72 104 L66 106 M72 104 L79 106" stroke="${t.beakFill}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+          </g>
+
+          <!-- Grup Badan Utama (Bernapas & Melompat) -->
+          <g class="svg-body-group">
+            <!-- Ekor Ayam -->
+            <path d="M28 58 Q10 44 16 34 Q26 38 33 48 Z" fill="${t.tailFill}" stroke="${t.strokeColor}" stroke-width="3.2" stroke-linejoin="round"/>
+            <path d="M25 66 Q8 58 12 47 Q23 48 31 56 Z" fill="${t.bodyShade}" stroke="${t.strokeColor}" stroke-width="3.2" stroke-linejoin="round"/>
+
+            <!-- Jengger Merah (Atas Kepala) -->
+            <g class="svg-crest">
+              <path d="M56 26 C54 14, 65 12, 66 22 C70 12, 81 14, 77 25 C83 18, 90 24, 82 32 Z" fill="${t.crestFill}" stroke="${t.strokeColor}" stroke-width="3" stroke-linejoin="round"/>
+            </g>
+
+            <!-- Badan Bulat Kartun Ayam -->
+            <path d="M30 66 C30 40, 52 25, 72 28 C89 30, 96 46, 94 66 C92 84, 78 90, 58 90 C38 90, 30 82, 30 66 Z" fill="${t.bodyFill}" stroke="${t.strokeColor}" stroke-width="3.5"/>
+
+            <!-- Bayangan Perut Bawah -->
+            <path d="M36 74 C44 86, 76 86, 88 70 C85 84, 74 88, 58 88 C42 88, 35 82, 36 74 Z" fill="${t.bodyShade}"/>
+
+            <!-- Paruh Kuning/Oranye -->
+            <path d="M92 48 L110 54 L92 61 Z" fill="${t.beakFill}" stroke="${t.strokeColor}" stroke-width="3" stroke-linejoin="round"/>
+
+            <!-- Gelambir Merah (Bawah Paruh) -->
+            <path d="M91 61 C91 70, 100 70, 98 60 Z" fill="${t.crestFill}" stroke="${t.strokeColor}" stroke-width="2.5"/>
+
+            <!-- Mata Ekspresif -->
+            <g class="svg-eye">
+              ${isDizzy ? `
+                <path d="M74 42 L84 52 M84 42 L74 52" stroke="${t.strokeColor}" stroke-width="3.5" stroke-linecap="round"/>
+              ` : `
+                <circle cx="80" cy="46" r="6.5" fill="#0F172A"/>
+                <circle cx="82" cy="44" r="2.3" fill="#FFFFFF"/>
+              `}
+            </g>
+
+            <!-- Pipi Merona Lucu -->
+            <ellipse cx="76" cy="56" rx="5" ry="3" fill="#FDA4AF" opacity="0.75"/>
+
+            <!-- Sayap Kepak -->
+            <g class="svg-wing">
+              <path d="M46 56 C38 56, 36 74, 52 76 C66 78, 72 66, 64 58 C58 54, 51 56, 46 56 Z" fill="${t.wingFill}" stroke="${t.strokeColor}" stroke-width="3.2" stroke-linejoin="round"/>
+            </g>
+          </g>
+        </svg>
+      `;
+    }
+
+    /* =========================================================================
+       4. WEB AUDIO API SYNTHESIZER (EFEK SUARA TANPA FILE MP3 EKSTERNAL)
+       ========================================================================= */
+    let soundEnabled = true;
+    let audioCtx = null;
+
+    function getAudioContext() {
+      if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) {
+          audioCtx = new AudioContextClass();
+        }
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    function playSoundEffect(type) {
+      if (!soundEnabled) return;
+      try {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+
+        if (type === 'correct') {
+          // Suara "Kotek-Kotek" Ceria + Nada Naik (Ayam Lari 4 Langkah!)
+          const freqs = [523.25, 659.25, 783.99, 1046.5];
+          freqs.forEach((f, idx) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(f, now + idx * 0.07);
+            gain.gain.setValueAtTime(0.18, now + idx * 0.07);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.07 + 0.14);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now + idx * 0.07);
+            osc.stop(now + idx * 0.07 + 0.15);
+          });
+        } else if (type === 'wrong') {
+          // Suara "Tetot" Rendah (Ayam Tidak Lari)
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(220, now);
+          osc.frequency.linearRampToValueAtTime(140, now + 0.25);
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.3);
+        } else if (type === 'tick') {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(660, now);
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.13);
+        } else if (type === 'go') {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(880, now);
+          osc.frequency.setValueAtTime(1174.66, now + 0.12);
+          gain.gain.setValueAtTime(0.22, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.42);
+        } else if (type === 'win') {
+          const notes = [523.25, 659.25, 783.99, 1046.5, 783.99, 1046.5];
+          const times = [0, 0.12, 0.24, 0.36, 0.52, 0.66];
+          notes.forEach((n, i) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(n, now + times[i]);
+            gain.gain.setValueAtTime(0.22, now + times[i]);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + times[i] + 0.22);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now + times[i]);
+            osc.stop(now + times[i] + 0.24);
+          });
+        }
+      } catch (e) {
+        // Audio context blocked or unsupported
+      }
+    }
+
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      document.getElementById('iconSoundOn').classList.toggle('hidden', !soundEnabled);
+      document.getElementById('iconSoundOff').classList.toggle('hidden', soundEnabled);
+      if (soundEnabled) playSoundEffect('tick');
+    }
+
+    /* =========================================================================
+       5. FITUR FULLSCREEN (ICON KANAN ATAS)
+       ========================================================================= */
+    function toggleFullScreen() {
+      const docEl = document.documentElement;
+      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+        if (docEl.requestFullscreen) {
+          docEl.requestFullscreen().catch(() => {});
+        } else if (docEl.webkitRequestFullscreen) {
+          docEl.webkitRequestFullscreen();
+        }
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen().catch(() => {});
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        }
+      }
+    }
+
+    document.addEventListener('fullscreenchange', updateFullscreenIcon);
+    document.addEventListener('webkitfullscreenchange', updateFullscreenIcon);
+
+    function updateFullscreenIcon() {
+      const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
+      document.getElementById('iconFsEnter').classList.toggle('hidden', isFs);
+      document.getElementById('iconFsExit').classList.toggle('hidden', !isFs);
+    }
+
+    /* =========================================================================
+       6. STATE PENGATURAN & LOGIKA MENU AWAL
+       ========================================================================= */
+    const STEPS_PER_CORRECT = 4; // Aturan #3: Jawaban benar ayam lari 4 langkah
+
+    const gameConfig = {
+      subject: 'informatika',
+      topic: '',
+      targetQuestions: 5, // Jumlah soal benar untuk mencapai garis finis
+      randomize: true,
+      playerCount: 3,
+      customNames: ['Tim Putih', 'Tim Kuning', 'Tim Biru']
+    };
+
+    let playersState = [];
+    let isRaceActive = false;
+    let raceSeconds = 0;
+    let raceTimerInterval = null;
+
+    // Inisialisasi Halaman Awal
+    function initApp() {
+      // Render 3 ayam preview di banner awal
+      document.getElementById('previewChickenWhite').innerHTML = generateChickenSVG(0);
+      document.getElementById('previewChickenYellow').innerHTML = generateChickenSVG(1);
+      document.getElementById('previewChickenBlue').innerHTML = generateChickenSVG(2);
+
+      // Pilih mata pelajaran default (Informatika)
+      selectSubject('informatika');
+      setRandomize(true);
+      setPlayerCount(3);
+    }
+
+    // 1. Pilih Mata Pelajaran -> Update Dropdown Materi Otomatis
+    function selectSubject(subjectKey) {
+      gameConfig.subject = subjectKey;
+      playSoundEffect('tick');
+
+      // Highlight tombol mata pelajaran aktif
+      document.querySelectorAll('.subject-btn').forEach(btn => {
+        const isSelected = btn.getAttribute('data-subject') === subjectKey;
+        if (isSelected) {
+          btn.className = "subject-btn btn-3d py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm border-2 flex flex-col items-center gap-1 transition-all bg-amber-400 text-amber-950 border-amber-600 shadow-[0_4px_0_#b45309]";
+        } else {
+          btn.className = "subject-btn btn-3d py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm border-2 flex flex-col items-center gap-1 transition-all bg-white hover:bg-amber-50 text-slate-700 border-slate-200";
+        }
+      });
+
+      // Isi dropdown Materi Pelajaran secara otomatis berdasarkan Mata Pelajaran
+      const subjectObj = QUESTION_DATABASE[subjectKey];
+      const topicSelect = document.getElementById('topicSelect');
+      topicSelect.innerHTML = '';
+
+      const topicKeys = Object.keys(subjectObj.topics);
+      topicKeys.forEach((tName) => {
+        const count = subjectObj.topics[tName].length;
+        const opt = document.createElement('option');
+        opt.value = tName;
+        opt.textContent = `${tName} (${count} Soal)`;
+        topicSelect.appendChild(opt);
+      });
+
+      // Tambahkan opsi "Semua Materi Gabungan"
+      const totalAll = topicKeys.reduce((acc, k) => acc + subjectObj.topics[k].length, 0);
+      const allOpt = document.createElement('option');
+      allOpt.value = '__ALL__';
+      allOpt.textContent = `🌟 Semua Materi ${subjectObj.label} (${totalAll} Soal)`;
+      topicSelect.appendChild(allOpt);
+
+      // Set materi pertama sebagai default
+      gameConfig.topic = topicKeys[0];
+      topicSelect.value = gameConfig.topic;
+
+      updateQuestionDatabaseMax();
+    }
+
+    function onTopicChange() {
+      const topicSelect = document.getElementById('topicSelect');
+      gameConfig.topic = topicSelect.value;
+      playSoundEffect('tick');
+      updateQuestionDatabaseMax();
+    }
+
+    function getActiveQuestionPool() {
+      const subjectObj = QUESTION_DATABASE[gameConfig.subject];
+      if (gameConfig.topic === '__ALL__') {
+        let combined = [];
+        Object.keys(subjectObj.topics).forEach(k => {
+          combined = combined.concat(subjectObj.topics[k]);
+        });
+        return combined;
+      }
+      return subjectObj.topics[gameConfig.topic] || [];
+    }
+
+    function updateQuestionDatabaseMax() {
+      const pool = getActiveQuestionPool();
+      const maxCount = Math.max(1, pool.length);
+
+      const slider = document.getElementById('questionCountSlider');
+      slider.max = maxCount;
+
+      // Sesuaikan nilai jika melebihi maksimal atau set ke nilai ideal
+      if (gameConfig.targetQuestions > maxCount) {
+        gameConfig.targetQuestions = maxCount;
+      } else if (gameConfig.targetQuestions < 1) {
+        gameConfig.targetQuestions = Math.min(5, maxCount);
+      }
+      slider.value = gameConfig.targetQuestions;
+
+      document.getElementById('maxDbCountBadge').textContent = maxCount;
+      document.getElementById('maxSliderLabel').textContent = `Maks Database: ${maxCount} Soal (${maxCount * STEPS_PER_CORRECT} Langkah)`;
+      syncQuestionCountLabels();
+    }
+
+    function onQuestionSliderInput(val) {
+      gameConfig.targetQuestions = parseInt(val, 10) || 1;
+      syncQuestionCountLabels();
+    }
+
+    function adjustQuestionCount(delta) {
+      const slider = document.getElementById('questionCountSlider');
+      const maxVal = parseInt(slider.max, 10) || 10;
+      let nextVal = gameConfig.targetQuestions + delta;
+      if (nextVal < 1) nextVal = 1;
+      if (nextVal > maxVal) nextVal = maxVal;
+      gameConfig.targetQuestions = nextVal;
+      slider.value = nextVal;
+      playSoundEffect('tick');
+      syncQuestionCountLabels();
+    }
+
+    function syncQuestionCountLabels() {
+      const qCount = gameConfig.targetQuestions;
+      const totalSteps = qCount * STEPS_PER_CORRECT;
+      document.getElementById('selectedQuestionCountText').textContent = qCount;
+      document.getElementById('selectedTotalStepsText').textContent = totalSteps;
+    }
+
+    // 4. Pengaturan Acak Soal (Ya / Tidak)
+    function setRandomize(isRandom) {
+      gameConfig.randomize = isRandom;
+      playSoundEffect('tick');
+      const btnYes = document.getElementById('btnRandomYes');
+      const btnNo = document.getElementById('btnRandomNo');
+
+      if (isRandom) {
+        btnYes.className = "btn-3d py-2.5 px-4 rounded-xl font-bold text-xs sm:text-sm border-2 flex items-center justify-center gap-2 transition-all bg-sky-500 text-white border-sky-700 shadow-[0_4px_0_#0369a1]";
+        btnNo.className = "btn-3d py-2.5 px-4 rounded-xl font-bold text-xs sm:text-sm border-2 flex items-center justify-center gap-2 transition-all bg-white text-slate-600 border-slate-200 hover:bg-sky-50";
+      } else {
+        btnNo.className = "btn-3d py-2.5 px-4 rounded-xl font-bold text-xs sm:text-sm border-2 flex items-center justify-center gap-2 transition-all bg-sky-500 text-white border-sky-700 shadow-[0_4px_0_#0369a1]";
+        btnYes.className = "btn-3d py-2.5 px-4 rounded-xl font-bold text-xs sm:text-sm border-2 flex items-center justify-center gap-2 transition-all bg-white text-slate-600 border-slate-200 hover:bg-sky-50";
+      }
+    }
+
+    // 5. Pengaturan Jumlah Pemain (1, 2, 3) & Input Nama Ayam (Putih, Kuning, Biru)
+    function setPlayerCount(count) {
+      gameConfig.playerCount = count;
+      playSoundEffect('tick');
+
+      document.querySelectorAll('.player-count-btn').forEach(btn => {
+        const p = parseInt(btn.getAttribute('data-players'), 10);
+        if (p === count) {
+          btn.className = "player-count-btn btn-3d py-3 px-3 rounded-xl font-bold text-xs sm:text-sm border-2 flex flex-col items-center gap-1 transition-all bg-sky-500 text-white border-sky-700 shadow-[0_4px_0_#0369a1]";
+        } else {
+          btn.className = "player-count-btn btn-3d py-3 px-3 rounded-xl font-bold text-xs sm:text-sm border-2 flex flex-col items-center gap-1 transition-all bg-white text-slate-700 border-slate-200 hover:bg-sky-50";
+        }
+      });
+
+      renderPlayerNameInputs();
+    }
+
+    function renderPlayerNameInputs() {
+      const container = document.getElementById('playerNamesInputs');
+      container.innerHTML = '';
+
+      for (let i = 0; i < gameConfig.playerCount; i++) {
+        const theme = CHICKEN_THEMES[i];
+        const card = document.createElement('div');
+        card.className = `flex items-center gap-2 p-2 rounded-xl border-2 ${theme.badgeBg}`;
+        card.innerHTML = `
+          <div class="w-9 h-9 shrink-0">${generateChickenSVG(i)}</div>
+          <div class="flex-1 min-w-0">
+            <div class="text-[10px] font-extrabold uppercase opacity-75">${theme.name}</div>
+            <input
+              type="text"
+              value="${gameConfig.customNames[i]}"
+              oninput="gameConfig.customNames[${i}] = this.value"
+              maxlength="18"
+              class="w-full bg-white/90 px-2 py-1 rounded-lg text-xs font-bold text-slate-800 border border-slate-300 focus:outline-none"
+              placeholder="Nama Siswa ${i + 1}"
+            />
+          </div>
+        `;
+        container.appendChild(card);
+      }
+    }
+  </script>
+
+  <script>
+    /* =========================================================================
+       7. ALUR BALAPAN & TANGKAP AYAM (MULTI-SCREEN 1, 2, ATAU 3 PEMAIN)
+       ========================================================================= */
+
+    // Fungsi pengacak array (Fisher-Yates Shuffle)
+    function shuffleArray(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function preparePlayerQuestions() {
+      const basePool = getActiveQuestionPool();
+      if (gameConfig.randomize) {
+        return shuffleArray(basePool);
+      }
+      return [...basePool];
+    }
+
+    // Mulai dengan Hitung Mundur 3.. 2.. 1..
+    function startRaceWithCountdown() {
+      playSoundEffect('tick');
+      document.getElementById('startScreen').classList.add('hidden');
+      document.getElementById('gameScreen').classList.remove('hidden');
+      document.getElementById('btnBackToMenu').classList.remove('hidden');
+
+      setupRaceArena();
+
+      const overlay = document.getElementById('countdownOverlay');
+      const numEl = document.getElementById('countdownNumber');
+      overlay.classList.remove('hidden');
+
+      let count = 3;
+      numEl.textContent = count;
+      playSoundEffect('tick');
+
+      const cdInterval = setInterval(() => {
+        count--;
+        if (count > 0) {
+          numEl.textContent = count;
+          playSoundEffect('tick');
+        } else if (count === 0) {
+          numEl.textContent = 'MULAI!';
+          playSoundEffect('go');
+        } else {
+          clearInterval(cdInterval);
+          overlay.classList.add('hidden');
+          beginActiveGameplay();
+        }
+      }, 750);
+    }
+
+    function setupRaceArena() {
+      isRaceActive = false;
+      clearInterval(raceTimerInterval);
+      raceSeconds = 0;
+      updateTimerDisplay();
+
+      const subjectObj = QUESTION_DATABASE[gameConfig.subject];
+      const topicTitle = gameConfig.topic === '__ALL__'
+        ? `Semua Materi ${subjectObj.label}`
+        : gameConfig.topic;
+
+      const totalTargetSteps = gameConfig.targetQuestions * STEPS_PER_CORRECT;
+
+      document.getElementById('hudSubjectBadge').textContent = `${subjectObj.icon} ${subjectObj.label}`;
+      document.getElementById('hudTopicBadge').textContent = `Materi: ${topicTitle}`;
+      document.getElementById('hudTargetSteps').textContent = totalTargetSteps;
+      document.getElementById('hudTargetQuestions').textContent = gameConfig.targetQuestions;
+
+      // Atur Pembagian Layar (1, 2, atau 3 Layar)
+      const arenaGrid = document.getElementById('playersArenaGrid');
+      if (gameConfig.playerCount === 1) {
+        arenaGrid.className = "grid grid-cols-1 max-w-4xl mx-auto gap-4 flex-1 w-full items-stretch";
+      } else if (gameConfig.playerCount === 2) {
+        arenaGrid.className = "grid grid-cols-1 md:grid-cols-2 gap-4 flex-1 w-full items-stretch";
+      } else {
+        arenaGrid.className = "grid grid-cols-1 lg:grid-cols-3 gap-3.5 flex-1 w-full items-stretch";
+      }
+
+      arenaGrid.innerHTML = '';
+      playersState = [];
+
+      for (let i = 0; i < gameConfig.playerCount; i++) {
+        const theme = CHICKEN_THEMES[i];
+        const playerName = (gameConfig.customNames[i] || theme.defaultPlayerName).trim() || theme.defaultPlayerName;
+
+        const pState = {
+          index: i,
+          name: playerName,
+          theme: theme,
+          steps: 0,
+          targetSteps: totalTargetSteps,
+          correctCount: 0,
+          wrongCount: 0,
+          questionQueue: preparePlayerQuestions(),
+          currentQPointer: 0,
+          isLocked: false
+        };
+        playersState.push(pState);
+
+        // Buat penanda batu pijakan langkah (kelipatan 4 langkah)
+        let stepMarkersHTML = '';
+        for (let qStep = 1; qStep <= gameConfig.targetQuestions; qStep++) {
+          const stepNum = qStep * STEPS_PER_CORRECT;
+          const pct = (qStep / gameConfig.targetQuestions) * 100;
+          if (qStep < gameConfig.targetQuestions) {
+            stepMarkersHTML += `
+              <div style="left: ${pct}%" class="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 flex flex-col items-center pointer-events-none">
+                <div class="w-5 h-5 rounded-full bg-amber-100 border-2 border-amber-600 text-[10px] font-extrabold text-amber-900 flex items-center justify-center shadow-sm">
+                  ${stepNum}
+                </div>
+              </div>
+            `;
+          }
+        }
+
+        // Satu layar pemain hanya menampilkan 1 ayam + soal pemain tersebut
+        const panel = document.createElement('div');
+        panel.id = `player-panel-${i}`;
+        panel.className = `flex flex-col justify-between rounded-3xl border-4 ${theme.panelBorder} ${theme.panelBg} shadow-xl overflow-hidden transition-all`;
+
+        panel.innerHTML = `
+          <!-- Header Layar Pemain -->
+          <div class="${theme.headerBg} px-4 py-2.5 flex items-center justify-between">
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="text-xs font-extrabold uppercase px-2 py-0.5 rounded-md bg-black/20">P${i + 1}</span>
+              <h3 class="font-cartoon text-base sm:text-lg font-bold truncate">${playerName}</h3>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+              <span class="bg-white/90 text-slate-900 font-extrabold text-xs px-2.5 py-1 rounded-xl shadow-sm">
+                👣 <span id="p-steps-${i}">0</span> / ${totalTargetSteps} Langkah
+              </span>
+            </div>
+          </div>
+
+          <!-- Lintasan Balap & Tangkap Ayam (Hanya 1 Ayam di Layar Ini) -->
+          <div class="p-3 sm:p-4 bg-gradient-to-b from-sky-200 via-sky-100 to-emerald-200 relative">
+            <!-- Indikator Progress Bar Langkah -->
+            <div class="flex items-center justify-between text-[11px] font-bold text-slate-700 mb-1.5">
+              <span>🚦 Garis Start (0)</span>
+              <span id="p-status-badge-${i}" class="px-2.5 py-0.5 rounded-full bg-white/80 text-slate-800 shadow-sm">
+                Siap Berlari! (+4 Langkah / Benar)
+              </span>
+              <span>🧺 Tangkap Finis (${totalTargetSteps})</span>
+            </div>
+
+            <!-- Arena Lari 1 Ayam -->
+            <div class="race-track-lane relative h-28 sm:h-32 rounded-2xl border-2 border-emerald-600 overflow-hidden flex items-center px-3">
+              <!-- Pagar Kayu Atas -->
+              <div class="absolute top-1.5 inset-x-0 h-3 border-b-2 border-amber-800/40 flex justify-around opacity-60 pointer-events-none">
+                <div class="w-2 h-3 bg-amber-700 rounded-t"></div>
+                <div class="w-2 h-3 bg-amber-700 rounded-t"></div>
+                <div class="w-2 h-3 bg-amber-700 rounded-t"></div>
+                <div class="w-2 h-3 bg-amber-700 rounded-t"></div>
+                <div class="w-2 h-3 bg-amber-700 rounded-t"></div>
+                <div class="w-2 h-3 bg-amber-700 rounded-t"></div>
+                <div class="w-2 h-3 bg-amber-700 rounded-t"></div>
+              </div>
+
+              <!-- Jalur Tanah & Penanda Langkah -->
+              <div class="dirt-path relative w-full h-12 rounded-xl flex items-center">
+                <!-- Track Area Sebenarnya (Dari 4% ke 84% agar ayam pas berhenti di garis finis) -->
+                <div class="relative w-full mx-6 h-full">
+                  ${stepMarkersHTML}
+                </div>
+              </div>
+
+              <!-- Garis Finis & Keranjang Tangkap Ayam -->
+              <div class="absolute right-2 inset-y-2 w-12 flex flex-col items-center justify-center pointer-events-none">
+                <div class="finish-checker w-3 h-full rounded-full border border-slate-700 shadow-sm"></div>
+                <div id="p-basket-${i}" class="absolute -left-2 bg-amber-500 text-white text-lg w-9 h-9 rounded-xl border-2 border-amber-800 shadow-md flex items-center justify-center" title="Zona Tangkap Finis">
+                  🧺
+                </div>
+              </div>
+
+              <!-- Karakter Ayam Vektor 2D Pemain Ini -->
+              <div id="p-chicken-wrap-${i}" style="left: 2%;" class="chicken-runner-wrapper absolute bottom-2 w-20 h-20 sm:w-24 sm:h-24 z-10 pointer-events-none">
+                <!-- Balon Pop-up "+4 Langkah!" -->
+                <div id="p-popup-${i}" class="hidden absolute -top-5 left-1/2 -translate-x-1/2 whitespace-nowrap font-cartoon text-xs font-bold px-2.5 py-0.5 rounded-full shadow-md z-20">
+                  +4 Langkah!
+                </div>
+                <div id="p-chicken-svg-${i}" class="w-full h-full">
+                  ${generateChickenSVG(i, false)}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Area Soal & Tombol Jawaban (Mendukung Multi-Touch di IFP) -->
+          <div class="p-3.5 sm:p-4 flex-1 flex flex-col justify-between gap-3 bg-white">
+            <!-- Kotak Pertanyaan -->
+            <div class="bg-slate-50 border-2 border-slate-200 rounded-2xl p-3 sm:p-4 min-h-[84px] flex flex-col justify-center relative">
+              <div class="flex items-center justify-between text-[11px] font-extrabold text-slate-400 uppercase mb-1">
+                <span id="p-qnum-${i}">Soal #1</span>
+                <span>Benar: <strong id="p-correct-${i}" class="text-emerald-600">0</strong> • Salah: <strong id="p-wrong-${i}" class="text-rose-500">0</strong></span>
+              </div>
+              <p id="p-qtext-${i}" class="font-bold text-slate-800 text-sm sm:text-base leading-snug">
+                Memuat pertanyaan...
+              </p>
+            </div>
+
+            <!-- 4 Tombol Opsi Jawaban (A, B, C, D) -->
+            <div id="p-options-${i}" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <!-- Di-render dinamis oleh renderPlayerQuestion(i) -->
+            </div>
+          </div>
+        `;
+
+        arenaGrid.appendChild(panel);
+        renderPlayerQuestion(i);
+      }
+    }
+
+    function beginActiveGameplay() {
+      isRaceActive = true;
+      raceTimerInterval = setInterval(() => {
+        raceSeconds++;
+        updateTimerDisplay();
+      }, 1000);
+    }
+
+    function updateTimerDisplay() {
+      const mins = String(Math.floor(raceSeconds / 60)).padStart(2, '0');
+      const secs = String(raceSeconds % 60).padStart(2, '0');
+      document.getElementById('hudTimer').textContent = `${mins}:${secs}`;
+    }
+
+    // Tampilkan Soal pada Layar Pemain Tertentu
+    function renderPlayerQuestion(playerIdx) {
+      const p = playersState[playerIdx];
+      if (!p) return;
+
+      // Jika daftar soal sudah habis tetapi belum ada yang mencapai garis finis:
+      // Soal akan terus berulang atau diacak kembali sesuai pengaturan (Aturan #3)
+      if (p.currentQPointer >= p.questionQueue.length) {
+        p.questionQueue = preparePlayerQuestions();
+        p.currentQPointer = 0;
+      }
+
+      const qItem = p.questionQueue[p.currentQPointer];
+      const totalAttempted = p.correctCount + p.wrongCount + 1;
+
+      document.getElementById(`p-qnum-${playerIdx}`).textContent = `Pertanyaan #${totalAttempted}`;
+      document.getElementById(`p-qtext-${playerIdx}`).textContent = qItem.q;
+
+      const optsContainer = document.getElementById(`p-options-${playerIdx}`);
+      optsContainer.innerHTML = '';
+
+      const letters = ['A', 'B', 'C', 'D'];
+      const btnColors = [
+        'bg-rose-50 hover:bg-rose-100 border-rose-300 text-rose-950 shadow-[0_3px_0_#fda4af]',
+        'bg-sky-50 hover:bg-sky-100 border-sky-300 text-sky-950 shadow-[0_3px_0_#7dd3fc]',
+        'bg-amber-50 hover:bg-amber-100 border-amber-300 text-amber-950 shadow-[0_3px_0_#fcd34d]',
+        'bg-emerald-50 hover:bg-emerald-100 border-emerald-300 text-emerald-950 shadow-[0_3px_0_#6ee7b7]'
+      ];
+      const badgeColors = [
+        'bg-rose-500 text-white',
+        'bg-sky-500 text-white',
+        'bg-amber-500 text-white',
+        'bg-emerald-500 text-white'
+      ];
+
+      qItem.opts.forEach((optText, optIdx) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = `btn-3d w-full text-left p-2.5 sm:p-3 rounded-2xl border-2 font-bold text-xs sm:text-sm flex items-center gap-2.5 transition-all ${btnColors[optIdx]}`;
+        btn.innerHTML = `
+          <span class="w-7 h-7 rounded-xl ${badgeColors[optIdx]} font-cartoon font-bold text-sm flex items-center justify-center shrink-0 shadow-sm">
+            ${letters[optIdx]}
+          </span>
+          <span class="leading-tight break-words">${optText}</span>
+        `;
+
+        // Gunakan pointerdown agar layar sentuh IFP merespons beberapa siswa secara bersamaan (Multi-Touch)
+        btn.addEventListener('pointerdown', (e) => {
+          e.preventDefault();
+          handlePlayerAnswer(playerIdx, optIdx, btn);
+        });
+
+        optsContainer.appendChild(btn);
+      });
+    }
+
+    // Validasi Jawaban Siswa (Benar = Lari 4 Langkah, Salah = Tidak Lari & Soal Lanjut)
+    function handlePlayerAnswer(playerIdx, chosenOptIdx, btnEl) {
+      if (!isRaceActive) return;
+      const p = playersState[playerIdx];
+      if (!p || p.isLocked) return;
+
+      p.isLocked = true;
+      const currentQ = p.questionQueue[p.currentQPointer];
+      const isCorrect = (chosenOptIdx === currentQ.a);
+
+      const chickenWrap = document.getElementById(`p-chicken-wrap-${playerIdx}`);
+      const chickenSvgBox = document.getElementById(`p-chicken-svg-${playerIdx}`);
+      const popupEl = document.getElementById(`p-popup-${playerIdx}`);
+      const statusBadge = document.getElementById(`p-status-badge-${playerIdx}`);
+
+      if (isCorrect) {
+        // JAWABAN BENAR -> AYAM LARI 4 LANGKAH!
+        playSoundEffect('correct');
+        p.correctCount++;
+        p.steps = Math.min(p.targetSteps, p.steps + STEPS_PER_CORRECT);
+
+        btnEl.className = "w-full text-left p-2.5 sm:p-3 rounded-2xl border-2 font-bold text-xs sm:text-sm flex items-center gap-2.5 bg-emerald-500 text-white border-emerald-700 scale-[1.02] transition-all";
+        document.getElementById(`p-correct-${playerIdx}`).textContent = p.correctCount;
+        document.getElementById(`p-steps-${playerIdx}`).textContent = p.steps;
+
+        // Hitung persentase posisi horizontal ayam (dari 2% sampai 76%)
+        const progressRatio = p.steps / p.targetSteps;
+        const leftPercent = 2 + (progressRatio * 74);
+        chickenWrap.style.left = `${leftPercent}%`;
+
+        // Aktifkan animasi vektor lari sprint
+        chickenWrap.classList.remove('is-wrong');
+        chickenWrap.classList.add('is-running');
+
+        // Tampilkan pop-up "+4 Langkah!"
+        popupEl.textContent = `🏃 +${STEPS_PER_CORRECT} Langkah!`;
+        popupEl.className = "absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap font-cartoon text-xs font-bold px-2.5 py-0.5 rounded-full shadow-md z-20 bg-emerald-500 text-white animate-bounce";
+        statusBadge.textContent = "✅ Benar! Ayam Lari +4 Langkah!";
+        statusBadge.className = "px-2.5 py-0.5 rounded-full bg-emerald-500 text-white font-bold shadow-sm";
+
+        setTimeout(() => {
+          chickenWrap.classList.remove('is-running');
+          popupEl.classList.add('hidden');
+        }, 650);
+
+        // Cek apakah ayam sudah menyentuh garis finis
+        if (p.steps >= p.targetSteps) {
+          chickenWrap.classList.add('is-winner');
+          document.getElementById(`p-basket-${playerIdx}`).textContent = '🏆';
+          setTimeout(() => {
+            declareWinner(playerIdx);
+          }, 500);
+          return;
+        }
+
+        // Lanjut ke soal berikutnya
+        setTimeout(() => {
+          p.currentQPointer++;
+          p.isLocked = false;
+          renderPlayerQuestion(playerIdx);
+        }, 420);
+
+      } else {
+        // JAWABAN SALAH -> AYAM TIDAK LARI & SOAL BERLANJUT!
+        playSoundEffect('wrong');
+        p.wrongCount++;
+        document.getElementById(`p-wrong-${playerIdx}`).textContent = p.wrongCount;
+
+        btnEl.className = "w-full text-left p-2.5 sm:p-3 rounded-2xl border-2 font-bold text-xs sm:text-sm flex items-center gap-2.5 bg-rose-500 text-white border-rose-700 transition-all";
+
+        // Ganti mata ayam menjadi ekspresi kaget sebentar dan goyang di tempat
+        chickenSvgBox.innerHTML = generateChickenSVG(playerIdx, true);
+        chickenWrap.classList.remove('is-running');
+        chickenWrap.classList.add('is-wrong');
+
+        popupEl.textContent = `❌ 0 Langkah!`;
+        popupEl.className = "absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap font-cartoon text-xs font-bold px-2.5 py-0.5 rounded-full shadow-md z-20 bg-rose-500 text-white";
+        statusBadge.textContent = "❌ Salah! Ayam Diam & Lanjut Soal";
+        statusBadge.className = "px-2.5 py-0.5 rounded-full bg-rose-500 text-white font-bold shadow-sm";
+
+        // Lanjutkan langsung ke soal berikutnya setelah umpan balik singkat
+        setTimeout(() => {
+          chickenSvgBox.innerHTML = generateChickenSVG(playerIdx, false);
+          chickenWrap.classList.remove('is-wrong');
+          popupEl.classList.add('hidden');
+          p.currentQPointer++;
+          p.isLocked = false;
+          renderPlayerQuestion(playerIdx);
+        }, 550);
+      }
+    }
+
+    // Deklarasi Pemenang Saat Ada Ayam Mencapai Garis Finis
+    function declareWinner(winnerIdx) {
+      if (!isRaceActive) return;
+      isRaceActive = false;
+      clearInterval(raceTimerInterval);
+      playSoundEffect('win');
+
+      const winner = playersState[winnerIdx];
+      document.getElementById('winnerTitleText').textContent = `🎉 ${winner.name} Juara!`;
+      document.getElementById('winnerSubtitleText').textContent =
+        `Berhasil menjawab ${winner.correctCount} soal dengan benar (${winner.steps} langkah) dan menangkap ${winner.theme.name} di garis finis dalam waktu ${document.getElementById('hudTimer').textContent}!`;
+
+      document.getElementById('winnerChickenAvatar').innerHTML = generateChickenSVG(winnerIdx, false);
+      document.getElementById('winnerChickenBadge').textContent = `${winner.theme.name} • ${winner.steps} Langkah 🥇`;
+
+      // Urutkan peringkat pemain berdasarkan jumlah langkah terbanyak
+      const sortedPlayers = [...playersState].sort((a, b) => b.steps - a.steps || a.wrongCount - b.wrongCount);
+      const statsBox = document.getElementById('winnerStatsContainer');
+      statsBox.innerHTML = '';
+
+      sortedPlayers.forEach((p, rankIdx) => {
+        const totalAns = p.correctCount + p.wrongCount;
+        const acc = totalAns > 0 ? Math.round((p.correctCount / totalAns) * 100) : 0;
+        const medals = ['🥇', '🥈', '🥉'];
+
+        const row = document.createElement('div');
+        row.className = "flex items-center justify-between bg-white p-3 rounded-xl border border-slate-200 shadow-sm text-xs sm:text-sm";
+        row.innerHTML = `
+          <div class="flex items-center gap-2.5">
+            <span class="text-xl">${medals[rankIdx] || '🐔'}</span>
+            <div class="w-8 h-8">${generateChickenSVG(p.index, false)}</div>
+            <div>
+              <div class="font-bold text-slate-800">${p.name}</div>
+              <div class="text-[11px] text-slate-500">${p.theme.name}</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-3 text-right">
+            <div>
+              <div class="font-extrabold text-amber-700">${p.steps} / ${p.targetSteps} Langkah</div>
+              <div class="text-[11px] text-slate-500">Benar: ${p.correctCount} • Salah: ${p.wrongCount} (Akurasi ${acc}%)</div>
+            </div>
+          </div>
+        `;
+        statsBox.appendChild(row);
+      });
+
+      document.getElementById('winnerModal').classList.remove('hidden');
+    }
+
+    function replaySameSettings() {
+      document.getElementById('winnerModal').classList.add('hidden');
+      startRaceWithCountdown();
+    }
+
+    function returnToMenuFromWinner() {
+      document.getElementById('winnerModal').classList.add('hidden');
+      executeReturnToMenu();
+    }
+
+    function confirmReturnToMenu() {
+      document.getElementById('confirmModal').classList.remove('hidden');
+    }
+
+    function closeConfirmModal() {
+      document.getElementById('confirmModal').classList.add('hidden');
+    }
+
+    function executeReturnToMenu() {
+      isRaceActive = false;
+      clearInterval(raceTimerInterval);
+      document.getElementById('confirmModal').classList.add('hidden');
+      document.getElementById('countdownOverlay').classList.add('hidden');
+      document.getElementById('gameScreen').classList.add('hidden');
+      document.getElementById('btnBackToMenu').classList.add('hidden');
+      document.getElementById('startScreen').classList.remove('hidden');
+    }
+
+    /* =========================================================================
+       8. FITUR BANK SOAL GURU (TAMBAH & KELOLA SOAL DI DALAM GAME)
+       ========================================================================= */
+    function openQuestionModal() {
+      playSoundEffect('tick');
+      const subjectObj = QUESTION_DATABASE[gameConfig.subject];
+      const topicKeys = Object.keys(subjectObj.topics);
+      const targetTopic = gameConfig.topic === '__ALL__' ? topicKeys[0] : gameConfig.topic;
+
+      document.getElementById('editorActiveTopicLabel').textContent = `${subjectObj.label} — ${targetTopic}`;
+      document.getElementById('editorFeedbackMsg').classList.add('hidden');
+      renderEditorQuestionList(targetTopic);
+      document.getElementById('questionEditorModal').classList.remove('hidden');
+    }
+
+    function closeQuestionModal() {
+      document.getElementById('questionEditorModal').classList.add('hidden');
+      // Refresh dropdown jumlah soal jika ada penambahan soal baru
+      selectSubject(gameConfig.subject);
+    }
+
+    function renderEditorQuestionList(targetTopic) {
+      const subjectObj = QUESTION_DATABASE[gameConfig.subject];
+      const list = subjectObj.topics[targetTopic] || [];
+      document.getElementById('editorQuestionListCount').textContent = list.length;
+
+      const listContainer = document.getElementById('editorQuestionList');
+      listContainer.innerHTML = '';
+
+      const letters = ['A', 'B', 'C', 'D'];
+      list.forEach((item, idx) => {
+        const div = document.createElement('div');
+        div.className = "bg-slate-50 p-3 rounded-xl border border-slate-200 flex items-start justify-between gap-2 text-xs";
+        div.innerHTML = `
+          <div>
+            <div class="font-bold text-slate-800">${idx + 1}. ${item.q}</div>
+            <div class="text-slate-500 mt-1">
+              Kunci: <strong class="text-emerald-700">${letters[item.a]}. ${item.opts[item.a]}</strong>
+            </div>
+          </div>
+          ${list.length > 1 ? `
+            <button onclick="deleteQuestionFromTopic('${targetTopic}', ${idx})" class="text-rose-500 hover:bg-rose-100 px-2 py-1 rounded-lg font-bold shrink-0">
+              Hapus
+            </button>
+          ` : ''}
+        `;
+        listContainer.appendChild(div);
+      });
+    }
+
+    function addCustomQuestion() {
+      const subjectObj = QUESTION_DATABASE[gameConfig.subject];
+      const topicKeys = Object.keys(subjectObj.topics);
+      const targetTopic = gameConfig.topic === '__ALL__' ? topicKeys[0] : gameConfig.topic;
+
+      const qText = document.getElementById('newQText').value.trim();
+      const opt0 = document.getElementById('newQOpt0').value.trim();
+      const opt1 = document.getElementById('newQOpt1').value.trim();
+      const opt2 = document.getElementById('newQOpt2').value.trim();
+      const opt3 = document.getElementById('newQOpt3').value.trim();
+      const ans = parseInt(document.getElementById('newQAnswer').value, 10);
+
+      const feedbackEl = document.getElementById('editorFeedbackMsg');
+
+      if (!qText || !opt0 || !opt1 || !opt2 || !opt3) {
+        feedbackEl.textContent = "⚠️ Mohon lengkapi pertanyaan dan keempat pilihan jawaban (A, B, C, D).";
+        feedbackEl.className = "text-xs font-bold text-rose-600 block";
+        return;
+      }
+
+      subjectObj.topics[targetTopic].push({
+        q: qText,
+        opts: [opt0, opt1, opt2, opt3],
+        a: ans
+      });
+
+      // Bersihkan input
+      document.getElementById('newQText').value = '';
+      document.getElementById('newQOpt0').value = '';
+      document.getElementById('newQOpt1').value = '';
+      document.getElementById('newQOpt2').value = '';
+      document.getElementById('newQOpt3').value = '';
+
+      feedbackEl.textContent = "✅ Soal berhasil ditambahkan ke database materi!";
+      feedbackEl.className = "text-xs font-bold text-emerald-600 block";
+      playSoundEffect('correct');
+      renderEditorQuestionList(targetTopic);
+    }
+
+    function deleteQuestionFromTopic(targetTopic, idx) {
+      const subjectObj = QUESTION_DATABASE[gameConfig.subject];
+      if (subjectObj.topics[targetTopic] && subjectObj.topics[targetTopic].length > 1) {
+        subjectObj.topics[targetTopic].splice(idx, 1);
+        playSoundEffect('tick');
+        renderEditorQuestionList(targetTopic);
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', initApp);
+  </script>
+</body>
+</html>
